@@ -1,4 +1,4 @@
-﻿namespace OnlineShopping.Models
+﻿namespace OnlineShoppingSystemSystem.Models
 {
     /// <summary>
     /// Represents a customer order in the Online Shopping system.
@@ -8,11 +8,11 @@
     {
         #region Constants
 
-        private const string StatusPending    = "Pending";
+        private const string StatusPending = "Pending";
         private const string StatusProcessing = "Processing";
-        private const string StatusShipped    = "Shipped";
-        private const string StatusDelivered  = "Delivered";
-        private const string StatusCancelled  = "Cancelled";
+        private const string StatusShipped = "Shipped";
+        private const string StatusDelivered = "Delivered";
+        private const string StatusCancelled = "Cancelled";
 
         #endregion
 
@@ -35,13 +35,13 @@
 
         public Order(int orderID, int customerID, string customerName, List<CartItem> cartItems)
         {
-            OrderID      = orderID;
-            CustomerID   = customerID;
+            OrderID = orderID;
+            CustomerID = customerID;
             CustomerName = customerName;
-            Status       = StatusPending;
-            OrderDate    = DateTime.Now;
+            Status = StatusPending;
+            OrderDate = DateTime.Now;
             DeliveryDate = null;
-            Items        = ConvertCartItemsToOrderItems(cartItems);
+            Items = ConvertCartItemsToOrderItems(cartItems);
         }
 
         #endregion
@@ -143,10 +143,10 @@
         {
             return Status switch
             {
-                "Pending"    => newStatus == StatusProcessing || newStatus == StatusCancelled,
-                "Processing" => newStatus == StatusShipped    || newStatus == StatusCancelled,
-                "Shipped"    => newStatus == StatusDelivered,
-                _            => false
+                "Pending" => newStatus == StatusProcessing || newStatus == StatusCancelled,
+                "Processing" => newStatus == StatusShipped || newStatus == StatusCancelled,
+                "Shipped" => newStatus == StatusDelivered,
+                _ => false
             };
         }
 

@@ -1,6 +1,6 @@
-﻿using OnlineShoppingSystem.Models;
+﻿using OnlineShoppingSystemSystem.Models;
 
-namespace OnlineShoppingSystem.Models
+namespace OnlineShoppingSystemSystem.Models
 {
     /// <summary>
     /// Represents a single product line item inside a shopping cart.

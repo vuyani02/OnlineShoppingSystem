@@ -1,4 +1,4 @@
-﻿namespace OnlineShoppingSystem.Models
+﻿namespace OnlineShoppingSystemSystem.Models
 {
     /// <summary>
     /// Represents a product in the Online Shopping system.

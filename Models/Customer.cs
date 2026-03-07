@@ -1,6 +1,6 @@
-﻿using OnlineShoppingSystem.Models;
+﻿using OnlineShoppingSystemSystem.Models;
 
-namespace OnlineShoppingSystem.Models
+namespace OnlineShoppingSystemSystem.Models
 {
     /// <summary>
     /// Represents a customer in the Online Shopping system.
