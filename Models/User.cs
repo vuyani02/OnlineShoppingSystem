@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OnlineShoppingSystemSystem.Models
+namespace OnlineShoppingSystem.Models
 {
     /// <summary>
     /// Represents a base user in the Online Shopping system.

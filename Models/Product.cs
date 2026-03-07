@@ -1,4 +1,6 @@
-﻿namespace OnlineShoppingSystemSystem.Models
+﻿using OnlineShoppingSystem.Exceptions;
+
+namespace OnlineShoppingSystemSystem.Models
 {
     /// <summary>
     /// Represents a product in the Online Shopping system.

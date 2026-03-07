@@ -1,4 +1,6 @@
-﻿namespace OnlineShoppingSystemSystem.Models
+﻿using OnlineShoppingSystem.Exceptions;
+
+namespace OnlineShoppingSystemSystem.Models
 {
     /// <summary>
     /// Represents a shopping cart belonging to a customer.

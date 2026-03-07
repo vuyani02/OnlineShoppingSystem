@@ -1,4 +1,4 @@
-﻿using OnlineShoppingSystemSystem.Models;
+﻿using OnlineShoppingSystem.Models;
 
 namespace OnlineShoppingSystemSystem.Models
 {

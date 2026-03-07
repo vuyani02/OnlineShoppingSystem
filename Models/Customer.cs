@@ -1,4 +1,5 @@
-﻿using OnlineShoppingSystemSystem.Models;
+﻿using OnlineShoppingSystem.Exceptions;
+using OnlineShoppingSystem.Models;
 
 namespace OnlineShoppingSystemSystem.Models
 {
