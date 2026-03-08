@@ -109,19 +109,19 @@ namespace OnlineShoppingSystem.Models
                 return;
             }
 
-            Console.WriteLine("╔══════════════════════════════════════════════╗");
-            Console.WriteLine("║               YOUR SHOPPING CART             ║");
-            Console.WriteLine("╚══════════════════════════════════════════════╝");
+            Console.WriteLine("╔══════════════════════════════════════════════════════════════╗");
+            Console.WriteLine("║                      YOUR SHOPPING CART                      ║");
+            Console.WriteLine("╚══════════════════════════════════════════════════════════════╝");
             Console.WriteLine();
-            Console.WriteLine($"{"Product",-20} {"Qty",-5} {"Price",-10} {"Subtotal",-10}");
-            Console.WriteLine(new string('─', 46));
+            Console.WriteLine($"{"ID",-5} {"Product",-20} {"Qty",-5} {"Price",-10} {"Subtotal",-10}");
+            Console.WriteLine(new string('─', 54));
 
             foreach (CartItem item in Items)
             {
-                Console.WriteLine($"{item.ProductName,-20} {item.Quantity,-5} R{item.UnitPrice,-9:F2} R{item.Subtotal:F2}");
+                Console.WriteLine($"{item.ProductID,-5} {item.ProductName,-20} {item.Quantity,-5} R{item.UnitPrice,-9:F2} R{item.Subtotal:F2}");
             }
 
-            Console.WriteLine(new string('─', 46));
+            Console.WriteLine(new string('─', 54));
             Console.WriteLine($"{"Total Items:",-20} {TotalItems}");
             Console.WriteLine($"{"Total Price:",-20} R{TotalPrice:F2}");
         }
