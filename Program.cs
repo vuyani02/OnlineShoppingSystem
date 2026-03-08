@@ -427,6 +427,9 @@ namespace OnlineShoppingSystem
 
             try
             {
+                Console.WriteLine($"{"ID",-5} {"Status",-11} {"TotalItems",-15} {"TotalAmount",-15} {"Date"}");
+                Console.WriteLine(new string('─', 61));
+
                 var orders = _orderService.GetOrderHistory(customer.UserID);
                 foreach (var order in orders)
                 {
@@ -749,8 +752,8 @@ namespace OnlineShoppingSystem
                 return;
             }
 
-            Console.WriteLine($"{"ID",-8} {"Customer",-20} {"Date",-15} {"Status",-12} {"Total"}");
-            Console.WriteLine(new string('─', 70));
+            Console.WriteLine($"{"ID",-5} {"Status",-11} {"TotalItems", -15} {"TotalAmount", -15} {"Date"}");
+            Console.WriteLine(new string('─', 61));
 
             foreach (var order in orders)
                 order.DisplaySummary();
