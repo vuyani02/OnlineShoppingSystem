@@ -1,6 +1,5 @@
 ﻿using OnlineShoppingSystem.Exceptions;
 using OnlineShoppingSystem.Models;
-using OnlineShoppingSystemSystem.Models;
 using System.Text.Json;
 
 namespace OnlineShoppingSystem.Repositories

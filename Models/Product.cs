@@ -1,6 +1,6 @@
 ﻿using OnlineShoppingSystem.Exceptions;
 
-namespace OnlineShoppingSystemSystem.Models
+namespace OnlineShoppingSystem.Models
 {
     /// <summary>
     /// Represents a product in the Online Shopping system.
@@ -107,9 +107,8 @@ namespace OnlineShoppingSystemSystem.Models
         /// </summary>
         public void DisplaySummary()
         {
-            string stockStatus = IsAvailable ? $"{Stock} in stock" : "Out of Stock";
-            string lowStock = IsLowStock ? "⚠️" : "";
-            Console.WriteLine($"[{ProductID}] {Name,-25} R{Price,-10:F2} ⭐{AverageRating:F1}  {stockStatus} {lowStock}");
+			string stockStatus = IsLowStock ? "[!]" : "";
+			Console.WriteLine($"{ProductID, -5} {Name,-25} {Category,-15} R{Price,-11:F2} {Stock,-8} {AverageRating:F1} {stockStatus}");
         }
 
         #endregion

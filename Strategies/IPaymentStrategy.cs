@@ -1,5 +1,5 @@
 ﻿using OnlineShoppingSystem.Models;
-using OnlineShoppingSystemSystem.Models;
+using OnlineShoppingSystem.Models;
 
 namespace OnlineShoppingSystem.Strategies
 {

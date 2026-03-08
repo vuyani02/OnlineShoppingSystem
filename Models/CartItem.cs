@@ -1,6 +1,6 @@
-﻿using OnlineShoppingSystemSystem.Models;
+﻿using OnlineShoppingSystem.Models;
 
-namespace OnlineShoppingSystemSystem.Models
+namespace OnlineShoppingSystem.Models
 {
     /// <summary>
     /// Represents a single product line item inside a shopping cart.
@@ -19,6 +19,8 @@ namespace OnlineShoppingSystemSystem.Models
         #endregion
 
         #region Constructor
+
+        public CartItem() { }
 
         public CartItem(Product product, int quantity)
         {

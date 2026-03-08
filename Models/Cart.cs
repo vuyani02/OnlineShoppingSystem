@@ -1,6 +1,6 @@
 ﻿using OnlineShoppingSystem.Exceptions;
 
-namespace OnlineShoppingSystemSystem.Models
+namespace OnlineShoppingSystem.Models
 {
     /// <summary>
     /// Represents a shopping cart belonging to a customer.
@@ -111,7 +111,8 @@ namespace OnlineShoppingSystemSystem.Models
 
             Console.WriteLine("╔══════════════════════════════════════════════╗");
             Console.WriteLine("║               YOUR SHOPPING CART             ║");
-            Console.WriteLine("╠══════════════════════════════════════════════╣");
+            Console.WriteLine("╚══════════════════════════════════════════════╝");
+            Console.WriteLine();
             Console.WriteLine($"{"Product",-20} {"Qty",-5} {"Price",-10} {"Subtotal",-10}");
             Console.WriteLine(new string('─', 46));
 
@@ -123,7 +124,6 @@ namespace OnlineShoppingSystemSystem.Models
             Console.WriteLine(new string('─', 46));
             Console.WriteLine($"{"Total Items:",-20} {TotalItems}");
             Console.WriteLine($"{"Total Price:",-20} R{TotalPrice:F2}");
-            Console.WriteLine("╚══════════════════════════════════════════════╝");
         }
 
         #endregion

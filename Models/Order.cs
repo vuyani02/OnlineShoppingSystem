@@ -1,4 +1,4 @@
-﻿namespace OnlineShoppingSystemSystem.Models
+﻿namespace OnlineShoppingSystem.Models
 {
     /// <summary>
     /// Represents a customer order in the Online Shopping system.
@@ -21,10 +21,10 @@
         public int OrderID { get; set; }
         public int CustomerID { get; set; }
         public string CustomerName { get; set; }
-        public List<OrderItem> Items { get; private set; }
-        public string Status { get; private set; }
-        public DateTime OrderDate { get; private set; }
-        public DateTime? DeliveryDate { get; private set; }
+        public List<OrderItem> Items { get; set; }
+        public string Status { get; set; }
+        public DateTime OrderDate { get; set; }
+        public DateTime? DeliveryDate { get; set; }
         public double TotalAmount => Items.Sum(item => item.Subtotal);
         public int TotalItems => Items.Sum(item => item.Quantity);
         public bool IsCancellable => Status == StatusPending || Status == StatusProcessing;
@@ -32,6 +32,11 @@
         #endregion
 
         #region Constructor
+
+        public Order()
+        {
+            Items = new List<OrderItem>();
+        }
 
         public Order(int orderID, int customerID, string customerName, List<CartItem> cartItems)
         {
@@ -85,7 +90,6 @@
         /// </summary>
         public void DisplayInfo()
         {
-            Console.WriteLine("╔══════════════════════════════════════════════════╗");
             Console.WriteLine($"  Order ID:   #{OrderID}");
             Console.WriteLine($"  Customer:   {CustomerName}");
             Console.WriteLine($"  Date:       {OrderDate:dd MMM yyyy HH:mm}");
@@ -94,7 +98,7 @@
             if (DeliveryDate.HasValue)
                 Console.WriteLine($"  Delivered:  {DeliveryDate:dd MMM yyyy HH:mm}");
 
-            Console.WriteLine("╠══════════════════════════════════════════════════╣");
+            Console.WriteLine();
             Console.WriteLine($"  {"Product",-25} {"Qty",-5} {"Price",-10} {"Subtotal"}");
             Console.WriteLine($"  {new string('─', 50)}");
 
@@ -106,7 +110,6 @@
             Console.WriteLine($"  {new string('─', 50)}");
             Console.WriteLine($"  {"Total Items:",-25} {TotalItems}");
             Console.WriteLine($"  {"Total Amount:",-25} R{TotalAmount:F2}");
-            Console.WriteLine("╚══════════════════════════════════════════════════╝");
         }
 
         /// <summary>

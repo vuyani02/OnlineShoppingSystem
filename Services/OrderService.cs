@@ -1,23 +1,21 @@
 ﻿using OnlineShoppingSystem.Exceptions;
 using OnlineShoppingSystem.Models;
-using OnlineShoppingSystem.Observers;
 using OnlineShoppingSystem.Repositories;
 using OnlineShoppingSystem.Strategies;
-using OnlineShoppingSystemSystem.Models;
 
 namespace OnlineShoppingSystem.Services
 {
     /// <summary>
     /// Handles all order related business logic.
-    /// Uses Strategy pattern for payment and Observer pattern for post-order events.
+    /// Uses Strategy pattern for payment processing.
     /// </summary>
     public class OrderService
     {
         #region Properties
 
         private readonly OrderRepository _orderRepo;
+        private readonly ProductRepository _productRepo;
         private readonly IPaymentStrategy _paymentStrategy;
-        private readonly List<IOrderObserver> _observers;
 
         #endregion
 
@@ -26,14 +24,8 @@ namespace OnlineShoppingSystem.Services
         public OrderService()
         {
             _orderRepo = DataStore.Instance.OrderRepository;
+            _productRepo = DataStore.Instance.ProductRepository;
             _paymentStrategy = new WalletPayment();
-
-            // Register observers — runs automatically when an order is placed
-            _observers = new List<IOrderObserver>
-            {
-                new InventoryObserver(),
-                new NotificationObserver()
-            };
         }
 
         #endregion
@@ -41,7 +33,7 @@ namespace OnlineShoppingSystem.Services
         #region Customer Methods
 
         /// <summary>
-        /// Processes checkout — creates order, processes payment and notifies observers.
+        /// Processes checkout — creates order, processes payment and reduces stock.
         /// Throws EmptyCartException if cart is empty.
         /// Throws InsufficientBalanceException if wallet balance is too low.
         /// </summary>
@@ -59,12 +51,16 @@ namespace OnlineShoppingSystem.Services
             // Save the order
             _orderRepo.Add(order);
 
-            // Observer pattern — notify all observers
-            NotifyObservers(order);
+            // Reduce stock for each item ordered
+            ReduceStock(order);
 
             // Add to customer history and clear cart
             customer.AddOrderToHistory(order);
             customer.Cart.Clear();
+
+            Console.WriteLine($"[OK] Order #{order.OrderID} confirmed!");
+            Console.WriteLine($"     Total:  R{order.TotalAmount:F2}");
+            Console.WriteLine($"     Status: {order.Status}");
         }
 
         /// <summary>
@@ -144,9 +140,7 @@ namespace OnlineShoppingSystem.Services
             Console.WriteLine("  Top Selling Products:");
 
             foreach (string product in _orderRepo.GetTopSellingProducts())
-            {
-                Console.WriteLine($"  → {product}");
-            }
+                Console.WriteLine($"  -> {product}");
 
             Console.WriteLine("╚══════════════════════════════════════════════╝");
         }
@@ -156,13 +150,22 @@ namespace OnlineShoppingSystem.Services
         #region Private Helper Methods
 
         /// <summary>
-        /// Notifies all registered observers when an order is placed.
+        /// Reduces stock for each product in the order.
         /// </summary>
-        private void NotifyObservers(Order order)
+        private void ReduceStock(Order order)
         {
-            foreach (IOrderObserver observer in _observers)
+            foreach (OrderItem item in order.Items)
             {
-                observer.OnOrderPlaced(order);
+                try
+                {
+                    Product product = _productRepo.GetById(item.ProductID);
+                    product.ReduceStock(item.Quantity);
+                    _productRepo.Update(product);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[!] Could not reduce stock for {item.ProductName}: {ex.Message}");
+                }
             }
         }
 
