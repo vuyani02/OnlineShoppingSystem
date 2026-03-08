@@ -1,7 +1,6 @@
 ﻿using OnlineShoppingSystem.Exceptions;
 using OnlineShoppingSystem.Models;
 using OnlineShoppingSystem.Services;
-using OnlineShoppingSystemSystem.Models;
 using System;
 using System.Data;
 using System.Runtime.Intrinsics.X86;
@@ -173,8 +172,8 @@ namespace OnlineShoppingSystem
             {
                 Console.Clear();
                 Console.WriteLine("╔══════════════════════════════════════════════╗");
-                Console.WriteLine($"║  Welcome, {customer.FullName,-34}║");
-                Console.WriteLine($"║  💰 Wallet: R{customer.WalletBalance,-31:F2}║");
+                Console.WriteLine($"║  Welcome, {customer.FullName,-35}║");
+                Console.WriteLine($"║  $ Wallet: R{customer.WalletBalance,-33:F2}║");
                 Console.WriteLine("╠══════════════════════════════════════════════╣");
                 Console.WriteLine("║  1.  Browse Products                         ║");
                 Console.WriteLine("║  2.  Search Products                         ║");
@@ -191,12 +190,13 @@ namespace OnlineShoppingSystem
                 Console.WriteLine("╚══════════════════════════════════════════════╝");
                 Console.Write("\nEnter choice: ");
 
-                switch (Console.ReadLine())
+                switch (Console.ReadLine().Trim())
                 {
-                    case "1": BrowseProducts(); break;
+                    case "1": BrowseProducts(); PressAnyKey(); break;
                     case "2": SearchProducts(); break;
                     case "3": AddToCart(customer); break;
                     case "4":
+                        Console.Clear();
                         customer.Cart.DisplayCart();
                         PressAnyKey(); break;
                     case "5": UpdateCart(customer); break;
@@ -234,14 +234,12 @@ namespace OnlineShoppingSystem
             {
                 var products = _productService.BrowseProducts();
                 Console.WriteLine($"{"ID",-5} {"Name",-25} {"Category",-15} {"Price",-12} {"Stock",-8} {"Rating"}");
-                Console.WriteLine(new string('─', 75));
+                Console.WriteLine(new string('─', 77));
 
                 foreach (var product in products)
                     product.DisplaySummary();
             }
             catch (InvalidOperationException ex) { ShowError(ex.Message); }
-
-            PressAnyKey();
         }
 
         /// <summary>
@@ -280,16 +278,17 @@ namespace OnlineShoppingSystem
             try
             {
                 BrowseProducts();
+                Console.WriteLine();
 
                 Console.Write("Enter Product ID: ");
-                if (!int.TryParse(Console.ReadLine(), out int productID))
+                if (!int.TryParse(Console.ReadLine().Trim(), out int productID))
                 {
                     ShowError("Invalid product ID.");
                     return;
                 }
 
                 Console.Write("Enter Quantity:   ");
-                if (!int.TryParse(Console.ReadLine(), out int quantity))
+                if (!int.TryParse(Console.ReadLine().Trim(), out int quantity))
                 {
                     ShowError("Invalid quantity.");
                     return;
@@ -323,14 +322,14 @@ namespace OnlineShoppingSystem
             try
             {
                 Console.Write("\nEnter Product ID to update: ");
-                if (!int.TryParse(Console.ReadLine(), out int productID))
+                if (!int.TryParse(Console.ReadLine().Trim(), out int productID))
                 {
                     ShowError("Invalid product ID.");
                     return;
                 }
 
                 Console.Write("Enter new quantity (0 to remove): ");
-                if (!int.TryParse(Console.ReadLine(), out int quantity))
+                if (!int.TryParse(Console.ReadLine().Trim(), out int quantity))
                 {
                     ShowError("Invalid quantity.");
                     return;
@@ -361,7 +360,7 @@ namespace OnlineShoppingSystem
 
             Console.Write($"\nTotal: R{customer.Cart.TotalPrice:F2} — Confirm? (y/n): ");
 
-            if (Console.ReadLine()?.ToLower() != "y")
+            if (Console.ReadLine().Trim()?.ToLower() != "y")
             {
                 Console.WriteLine("Checkout cancelled.");
                 PressAnyKey();
@@ -406,7 +405,7 @@ namespace OnlineShoppingSystem
 
             try
             {
-                if (!double.TryParse(Console.ReadLine(), out double amount))
+                if (!double.TryParse(Console.ReadLine().Trim(), out double amount))
                 {
                     ShowError("Invalid amount.");
                     return;
@@ -450,7 +449,7 @@ namespace OnlineShoppingSystem
 
             try
             {
-                if (!int.TryParse(Console.ReadLine(), out int orderID))
+                if (!int.TryParse(Console.ReadLine().Trim(), out int orderID))
                 {
                     ShowError("Invalid order ID.");
                     return;
@@ -475,7 +474,7 @@ namespace OnlineShoppingSystem
 
             try
             {
-                if (!int.TryParse(Console.ReadLine(), out int productID))
+                if (!int.TryParse(Console.ReadLine().Trim(), out int productID))
                 {
                     ShowError("Invalid product ID.");
                     return;
@@ -484,14 +483,14 @@ namespace OnlineShoppingSystem
                 Product product = _productService.GetProduct(productID);
 
                 Console.Write("Rating (1-5):  ");
-                if (!double.TryParse(Console.ReadLine(), out double rating))
+                if (!double.TryParse(Console.ReadLine().Trim(), out double rating))
                 {
                     ShowError("Invalid rating.");
                     return;
                 }
 
                 Console.Write("Comment:       ");
-                string comment = Console.ReadLine();
+                string comment = Console.ReadLine().Trim();
 
                 int reviewID = product.Reviews.Count + 1;
                 Review review = new Review(reviewID, productID, customer.UserID, customer.FullName, rating, comment);
@@ -518,7 +517,7 @@ namespace OnlineShoppingSystem
             {
                 Console.Clear();
                 Console.WriteLine("╔══════════════════════════════════════════════╗");
-                Console.WriteLine($"║  Admin: {admin.FullName,-36}║");
+                Console.WriteLine($"║  Admin: {admin.FullName,-37}║");
                 Console.WriteLine("╠══════════════════════════════════════════════╣");
                 Console.WriteLine("║  1.  Add Product                             ║");
                 Console.WriteLine("║  2.  Update Product                          ║");
@@ -533,7 +532,7 @@ namespace OnlineShoppingSystem
                 Console.WriteLine("╚══════════════════════════════════════════════╝");
                 Console.Write("\nEnter choice: ");
 
-                switch (Console.ReadLine())
+                switch (Console.ReadLine().Trim())
                 {
                     case "1": AddProduct(admin); break;
                     case "2": UpdateProduct(admin); break;
@@ -573,23 +572,23 @@ namespace OnlineShoppingSystem
             try
             {
                 Console.Write("Name:        ");
-                string name = Console.ReadLine();
+                string name = Console.ReadLine().Trim();
 
                 Console.Write("Description: ");
-                string description = Console.ReadLine();
+                string description = Console.ReadLine().Trim();
 
                 Console.Write("Category:    ");
-                string category = Console.ReadLine();
+                string category = Console.ReadLine().Trim();
 
                 Console.Write("Price: R");
-                if (!double.TryParse(Console.ReadLine(), out double price))
+                if (!double.TryParse(Console.ReadLine().Trim(), out double price))
                 {
                     ShowError("Invalid price.");
                     return;
                 }
 
                 Console.Write("Stock:       ");
-                if (!int.TryParse(Console.ReadLine(), out int stock))
+                if (!int.TryParse(Console.ReadLine().Trim(), out int stock))
                 {
                     ShowError("Invalid stock.");
                     return;
@@ -615,23 +614,23 @@ namespace OnlineShoppingSystem
                 ViewAllProducts();
 
                 Console.Write("Enter Product ID to update: ");
-                if (!int.TryParse(Console.ReadLine(), out int productID))
+                if (!int.TryParse(Console.ReadLine().Trim(), out int productID))
                 {
                     ShowError("Invalid product ID.");
                     return;
                 }
 
                 Console.Write("New Name:        ");
-                string name = Console.ReadLine();
+                string name = Console.ReadLine().Trim();
 
                 Console.Write("New Description: ");
-                string description = Console.ReadLine();
+                string description = Console.ReadLine().Trim();
 
                 Console.Write("New Category:    ");
-                string category = Console.ReadLine();
+                string category = Console.ReadLine().Trim();
 
                 Console.Write("New Price: R");
-                if (!double.TryParse(Console.ReadLine(), out double price))
+                if (!double.TryParse(Console.ReadLine().Trim(), out double price))
                 {
                     ShowError("Invalid price.");
                     return;
@@ -658,14 +657,14 @@ namespace OnlineShoppingSystem
                 ViewAllProducts();
 
                 Console.Write("Enter Product ID to delete: ");
-                if (!int.TryParse(Console.ReadLine(), out int productID))
+                if (!int.TryParse(Console.ReadLine().Trim(), out int productID))
                 {
                     ShowError("Invalid product ID.");
                     return;
                 }
 
                 Console.Write("Are you sure? (y/n): ");
-                if (Console.ReadLine()?.ToLower() != "y")
+                if (Console.ReadLine().Trim()?.ToLower() != "y")
                 {
                     Console.WriteLine("Delete cancelled.");
                     PressAnyKey();
@@ -692,14 +691,14 @@ namespace OnlineShoppingSystem
                 ViewLowStockProducts();
 
                 Console.Write("Enter Product ID to restock: ");
-                if (!int.TryParse(Console.ReadLine(), out int productID))
+                if (!int.TryParse(Console.ReadLine().Trim(), out int productID))
                 {
                     ShowError("Invalid product ID.");
                     return;
                 }
 
                 Console.Write("Enter quantity to add: ");
-                if (!int.TryParse(Console.ReadLine(), out int quantity))
+                if (!int.TryParse(Console.ReadLine().Trim(), out int quantity))
                 {
                     ShowError("Invalid quantity.");
                     return;
@@ -722,8 +721,8 @@ namespace OnlineShoppingSystem
             Console.WriteLine("=== ALL PRODUCTS ===\n");
 
             var products = _productService.BrowseProducts();
-            Console.WriteLine($"{"ID",-5} {"Name",-25} {"Category",-15} {"Price",-12} {"Stock",-8} {"Rating"}");
-            Console.WriteLine(new string('─', 75));
+            Console.WriteLine($"{"ID",-5} {"Name",-25} {"Category",-15} {"Price",-11} {"Stock",-8} {"Rating"}");
+            Console.WriteLine(new string('─', 77));
 
             foreach (var product in products)
                 product.DisplaySummary();
@@ -770,7 +769,7 @@ namespace OnlineShoppingSystem
                 ViewAllOrders();
 
                 Console.Write("Enter Order ID: ");
-                if (!int.TryParse(Console.ReadLine(), out int orderID))
+                if (!int.TryParse(Console.ReadLine().Trim(), out int orderID))
                 {
                     ShowError("Invalid order ID.");
                     return;
@@ -783,7 +782,7 @@ namespace OnlineShoppingSystem
                 Console.WriteLine("4. Cancelled");
                 Console.Write("Enter choice: ");
 
-                string newStatus = Console.ReadLine() switch
+                string newStatus = Console.ReadLine().Trim() switch
                 {
                     "1" => "Processing",
                     "2" => "Shipped",

@@ -1,4 +1,4 @@
-﻿namespace OnlineShoppingSystemSystem.Models
+﻿namespace OnlineShoppingSystem.Models
 {
     /// <summary>
     /// Represents a single product line item within an order.
@@ -17,6 +17,8 @@
         #endregion
 
         #region Constructor
+
+        public OrderItem() { }
 
         public OrderItem(int productID, string productName, double unitPrice, int quantity)
         {

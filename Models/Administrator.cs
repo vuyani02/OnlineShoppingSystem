@@ -1,6 +1,6 @@
 ﻿using OnlineShoppingSystem.Models;
 
-namespace OnlineShoppingSystemSystem.Models
+namespace OnlineShoppingSystem.Models
 {
     /// <summary>
     /// Represents an administrator in the Online Shopping system.

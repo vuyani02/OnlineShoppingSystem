@@ -1,7 +1,7 @@
 ﻿using OnlineShoppingSystem.Exceptions;
 using OnlineShoppingSystem.Models;
 
-namespace OnlineShoppingSystemSystem.Models
+namespace OnlineShoppingSystem.Models
 {
     /// <summary>
     /// Represents a customer in the Online Shopping system.

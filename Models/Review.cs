@@ -1,6 +1,6 @@
-﻿using OnlineShoppingSystemSystem.Models;
+﻿using OnlineShoppingSystem.Models;
 
-namespace OnlineShoppingSystemSystem.Models
+namespace OnlineShoppingSystem.Models
 {
     /// <summary>
     /// Represents a customer review on a product.
@@ -20,6 +20,8 @@ namespace OnlineShoppingSystemSystem.Models
         #endregion
 
         #region Constructor
+
+        public Review() { }
 
         public Review(int reviewID, int productID, int customerID, string customerName, double rating, string comment)
         {

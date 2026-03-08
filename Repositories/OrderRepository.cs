@@ -1,7 +1,7 @@
 ﻿using OnlineShoppingSystem.Exceptions;
 using OnlineShoppingSystem.Models;
 using OnlineShoppingSystem.Repositories;
-using OnlineShoppingSystemSystem.Models;
+using OnlineShoppingSystem.Models;
 using System.Text.Json;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
