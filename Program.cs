@@ -542,7 +542,7 @@ namespace OnlineShoppingSystem
                     case "3": DeleteProduct(admin); break;
                     case "4": RestockProduct(admin); break;
                     case "5": ViewAllProducts(); PressAnyKey(); break;
-                    case "6": ViewAllOrders(); break;
+                    case "6": ViewAllOrders(); PressAnyKey(); break;
                     case "7": UpdateOrderStatus(admin); break;
                     case "8": ViewLowStockProducts(); PressAnyKey(); break;
                     case "9":
@@ -757,8 +757,6 @@ namespace OnlineShoppingSystem
 
             foreach (var order in orders)
                 order.DisplaySummary();
-
-            PressAnyKey();
         }
 
         /// <summary>
@@ -772,6 +770,8 @@ namespace OnlineShoppingSystem
             try
             {
                 ViewAllOrders();
+
+                Console.WriteLine();
 
                 Console.Write("Enter Order ID: ");
                 if (!int.TryParse(Console.ReadLine().Trim(), out int orderID))
