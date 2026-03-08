@@ -538,7 +538,7 @@ namespace OnlineShoppingSystem
                     case "2": UpdateProduct(admin); break;
                     case "3": DeleteProduct(admin); break;
                     case "4": RestockProduct(admin); break;
-                    case "5": ViewAllProducts(); break;
+                    case "5": ViewAllProducts(); PressAnyKey(); break;
                     case "6": ViewAllOrders(); break;
                     case "7": UpdateOrderStatus(admin); break;
                     case "8": ViewLowStockProducts(); break;
@@ -612,6 +612,8 @@ namespace OnlineShoppingSystem
             try
             {
                 ViewAllProducts();
+
+                Console.WriteLine();
 
                 Console.Write("Enter Product ID to update: ");
                 if (!int.TryParse(Console.ReadLine().Trim(), out int productID))
@@ -726,8 +728,6 @@ namespace OnlineShoppingSystem
 
             foreach (var product in products)
                 product.DisplaySummary();
-
-            PressAnyKey();
         }
 
         /// <summary>
