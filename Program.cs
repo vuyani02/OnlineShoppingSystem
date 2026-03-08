@@ -541,7 +541,7 @@ namespace OnlineShoppingSystem
                     case "5": ViewAllProducts(); PressAnyKey(); break;
                     case "6": ViewAllOrders(); break;
                     case "7": UpdateOrderStatus(admin); break;
-                    case "8": ViewLowStockProducts(); break;
+                    case "8": ViewLowStockProducts(); PressAnyKey(); break;
                     case "9":
                         _orderService.GenerateSalesReport();
                         PressAnyKey(); break;
@@ -692,6 +692,8 @@ namespace OnlineShoppingSystem
             {
                 ViewLowStockProducts();
 
+                Console.WriteLine();
+
                 Console.Write("Enter Product ID to restock: ");
                 if (!int.TryParse(Console.ReadLine().Trim(), out int productID))
                 {
@@ -818,17 +820,14 @@ namespace OnlineShoppingSystem
             if (!products.Any())
             {
                 Console.WriteLine("✓ No low stock products.");
-                PressAnyKey();
                 return;
             }
 
-            Console.WriteLine($"{"ID",-5} {"Name",-25} {"Category",-15} {"Price",-12} {"Stock"}");
-            Console.WriteLine(new string('─', 65));
+            Console.WriteLine($"{"ID",-5} {"Name",-25} {"Category",-15} {"Price",-12} {"Stock",-8} {"Rating"}");
+            Console.WriteLine(new string('─', 77));
 
             foreach (var product in products)
                 product.DisplaySummary();
-
-            PressAnyKey();
         }
 
         #endregion
