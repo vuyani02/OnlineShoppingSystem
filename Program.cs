@@ -546,6 +546,7 @@ namespace OnlineShoppingSystem
                     case "7": UpdateOrderStatus(admin); break;
                     case "8": ViewLowStockProducts(); PressAnyKey(); break;
                     case "9":
+                        Console.Clear();
                         _orderService.GenerateSalesReport();
                         PressAnyKey(); break;
                     case "10":
