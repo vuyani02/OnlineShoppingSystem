@@ -3,6 +3,8 @@ using OnlineShoppingSystem.Models;
 using OnlineShoppingSystem.Services;
 using OnlineShoppingSystemSystem.Models;
 using System;
+using System.Data;
+using System.Runtime.Intrinsics.X86;
 
 namespace OnlineShoppingSystem
 {
@@ -17,7 +19,8 @@ namespace OnlineShoppingSystem
         private static UserService _userService = new UserService();
         private static ProductService _productService = new ProductService();
         private static OrderService _orderService = new OrderService();
-        private static User _loggedInUser = null;
+        private static Customer _loggedInCustomer = null;
+        private static Administrator _loggedInAdmin = null;
 
         #endregion
 
@@ -49,7 +52,7 @@ namespace OnlineShoppingSystem
                 Console.WriteLine("╚══════════════════════════════════════════════╝");
                 Console.Write("\nEnter choice: ");
 
-                switch (Console.ReadLine())
+                switch (Console.ReadLine().Trim())
                 {
                     case "1": Register(); break;
                     case "2": Login(); break;
@@ -82,7 +85,7 @@ namespace OnlineShoppingSystem
             Console.WriteLine("2. Administrator");
             Console.Write("Enter choice: ");
 
-            string role = Console.ReadLine() switch
+            string role = Console.ReadLine().Trim() switch
             {
                 "1" => "Customer",
                 "2" => "Administrator",
@@ -98,16 +101,16 @@ namespace OnlineShoppingSystem
             try
             {
                 Console.Write("First Name:  ");
-                string firstName = Console.ReadLine();
+                string firstName = Console.ReadLine().Trim();
 
                 Console.Write("Last Name:   ");
-                string lastName = Console.ReadLine();
+                string lastName = Console.ReadLine().Trim();
 
                 Console.Write("Email:       ");
-                string email = Console.ReadLine();
+                string email = Console.ReadLine().Trim();
 
                 Console.Write("Password:    ");
-                string password = Console.ReadLine();
+                string password = Console.ReadLine().Trim();
 
                 _userService.Register(role, firstName, lastName, email, password);
                 PressAnyKey();
@@ -130,20 +133,28 @@ namespace OnlineShoppingSystem
             try
             {
                 Console.Write("Email:    ");
-                string email = Console.ReadLine();
+                string email = Console.ReadLine().Trim();
 
                 Console.Write("Password: ");
-                string password = Console.ReadLine();
+                string password = Console.ReadLine().Trim();
 
-                _loggedInUser = _userService.Login(email, password);
+                // Get the user from repository
+                User user = _userService.Login(email, password);
 
-                Console.WriteLine($"\n✓ Welcome back, {_loggedInUser.FullName}!");
+                Console.WriteLine($"\n✓ Welcome back, {user.FullName}!");
                 PressAnyKey();
 
-                if (_loggedInUser is Customer customer)
-                    ShowCustomerMenu(customer);
-                else if (_loggedInUser is Administrator admin)
-                    ShowAdminMenu(admin);
+                // Check role and route to correct menu
+                if (user.Role == "Customer")
+                {
+                    _loggedInCustomer = new Customer(user.UserID, user.FirstName, user.LastName, user.Email, user.Password);
+                    ShowCustomerMenu(_loggedInCustomer);
+                }
+                else if (user.Role == "Administrator")
+                {
+                    _loggedInAdmin = new Administrator(user.UserID, user.FirstName, user.LastName, user.Email, user.Password);
+                    ShowAdminMenu(_loggedInAdmin);
+                }
             }
             catch (InvalidLoginException ex) { ShowError(ex.Message); }
             catch (Exception ex) { ShowError($"Unexpected error: {ex.Message}"); }
@@ -196,7 +207,7 @@ namespace OnlineShoppingSystem
                     case "10": TrackOrder(); break;
                     case "11": ReviewProduct(customer); break;
                     case "12":
-                        _loggedInUser = null;
+                        _loggedInCustomer = null;
                         Console.WriteLine("✓ Logged out successfully.");
                         PressAnyKey();
                         return;
@@ -536,7 +547,7 @@ namespace OnlineShoppingSystem
                         _orderService.GenerateSalesReport();
                         PressAnyKey(); break;
                     case "10":
-                        _loggedInUser = null;
+                        _loggedInAdmin = null;
                         Console.WriteLine("✓ Logged out successfully.");
                         PressAnyKey();
                         return;
