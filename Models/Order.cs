@@ -1,21 +1,14 @@
-﻿namespace OnlineShoppingSystem.Models
+﻿using System.Text.Json.Serialization;
+using OnlineShoppingSystem.States;
+
+namespace OnlineShoppingSystem.Models
 {
     /// <summary>
     /// Represents a customer order in the Online Shopping system.
-    /// Tracks the full lifecycle of an order from placement to delivery.
+    /// Uses the State Pattern to manage order lifecycle transitions.
     /// </summary>
     public class Order
     {
-        #region Constants
-
-        private const string StatusPending = "Pending";
-        private const string StatusProcessing = "Processing";
-        private const string StatusShipped = "Shipped";
-        private const string StatusDelivered = "Delivered";
-        private const string StatusCancelled = "Cancelled";
-
-        #endregion
-
         #region Properties
 
         public int OrderID { get; set; }
@@ -25,14 +18,25 @@
         public string Status { get; set; }
         public DateTime OrderDate { get; set; }
         public DateTime? DeliveryDate { get; set; }
+
+        [JsonIgnore]
         public double TotalAmount => Items.Sum(item => item.Subtotal);
+
+        [JsonIgnore]
         public int TotalItems => Items.Sum(item => item.Quantity);
-        public bool IsCancellable => Status == StatusPending || Status == StatusProcessing;
+
+        [JsonIgnore]
+        public bool IsCancellable => Status == "Pending" || Status == "Processing";
+
+        // Current state object — not saved to JSON
+        [JsonIgnore]
+        private IOrderState _currentState;
 
         #endregion
 
         #region Constructor
 
+        // Parameterless constructor for JSON deserialization
         public Order()
         {
             Items = new List<OrderItem>();
@@ -43,50 +47,98 @@
             OrderID = orderID;
             CustomerID = customerID;
             CustomerName = customerName;
-            Status = StatusPending;
             OrderDate = DateTime.Now;
             DeliveryDate = null;
             Items = ConvertCartItemsToOrderItems(cartItems);
+
+            // Set initial state
+            SetState(new PendingState());
         }
 
         #endregion
 
-        #region Methods
+        #region State Methods
 
         /// <summary>
-        /// Updates the order status to the next stage in the lifecycle.
-        /// Throws an exception if the status transition is invalid.
+        /// Sets the current state and updates the Status string.
         /// </summary>
-        public void UpdateStatus(string newStatus)
+        public void SetState(IOrderState state)
         {
-            if (!IsValidStatusTransition(newStatus))
-                throw new InvalidOperationException($"Cannot change status from {Status} to {newStatus}.");
-
-            Status = newStatus;
-            Console.WriteLine($"✓ Order #{OrderID} status updated to: {Status}");
-
-            if (newStatus == StatusDelivered)
-            {
-                DeliveryDate = DateTime.Now;
-                Console.WriteLine($"✓ Delivered on {DeliveryDate:dd MMM yyyy HH:mm}");
-            }
+            _currentState = state;
+            Status = state.StateName;
         }
 
         /// <summary>
-        /// Cancels the order if it is still in a cancellable state.
-        /// Throws an exception if the order cannot be cancelled.
+        /// Sets the delivery date when order is delivered.
+        /// </summary>
+        public void SetDeliveryDate(DateTime date)
+        {
+            DeliveryDate = date;
+        }
+
+        /// <summary>
+        /// Loads the correct state object based on the saved Status string.
+        /// Called after loading from JSON since state objects aren't serialized.
+        /// </summary>
+        public void RestoreState()
+        {
+            _currentState = Status switch
+            {
+                "Pending" => new PendingState(),
+                "Processing" => new ProcessingState(),
+                "Shipped" => new ShippedState(),
+                "Delivered" => new DeliveredState(),
+                "Cancelled" => new CancelledState(),
+                _ => new PendingState()
+            };
+        }
+
+        #endregion
+
+        #region Order Lifecycle Methods
+
+        /// <summary>
+        /// Transitions the order to Processing state.
+        /// </summary>
+        public void Process()
+        {
+            EnsureStateLoaded();
+            _currentState.Process(this);
+        }
+
+        /// <summary>
+        /// Transitions the order to Shipped state.
+        /// </summary>
+        public void Ship()
+        {
+            EnsureStateLoaded();
+            _currentState.Ship(this);
+        }
+
+        /// <summary>
+        /// Transitions the order to Delivered state.
+        /// </summary>
+        public void Deliver()
+        {
+            EnsureStateLoaded();
+            _currentState.Deliver(this);
+        }
+
+        /// <summary>
+        /// Cancels the order if current state allows it.
         /// </summary>
         public void CancelOrder()
         {
-            if (!IsCancellable)
-                throw new InvalidOperationException($"Order #{OrderID} cannot be cancelled — current status: {Status}.");
-
-            Status = StatusCancelled;
-            Console.WriteLine($"✓ Order #{OrderID} has been cancelled.");
+            EnsureStateLoaded();
+            _currentState.Cancel(this);
         }
 
+        #endregion
+
+        #region Display Methods
+
         /// <summary>
-        /// Displays a full summary of the order including all items and totals.
+        /// Displays full order details including all items and totals.
         /// </summary>
         public void DisplayInfo()
         {
@@ -114,12 +166,10 @@
 
         /// <summary>
         /// Displays a compact single line summary of the order.
-        /// Used when listing order history.
         /// </summary>
-        /// Console.WriteLine($"{"ID",-5} {"Status",-11} {"TotalItems", -15} {"TotalAmount", -15} {"Date"}");
         public void DisplaySummary()
         {
-            Console.WriteLine($"{OrderID, -5}  {Status,-11}  {TotalItems, -13}  R{TotalAmount, -13:F2} {OrderDate:dd MMM yyyy}");
+            Console.WriteLine($"{OrderID,-5}  {Status,-11}  {TotalItems,-13}  R{TotalAmount,-13:F2} {OrderDate:dd MMM yyyy}");
         }
 
         #endregion
@@ -127,7 +177,17 @@
         #region Private Helper Methods
 
         /// <summary>
-        /// Converts cart items into order items at the time of purchase.
+        /// Ensures state is loaded — restores from Status string if needed.
+        /// This handles orders loaded from JSON where state object is null.
+        /// </summary>
+        private void EnsureStateLoaded()
+        {
+            if (_currentState == null)
+                RestoreState();
+        }
+
+        /// <summary>
+        /// Converts cart items into order items at time of purchase.
         /// Preserves the price at the time of purchase.
         /// </summary>
         private List<OrderItem> ConvertCartItemsToOrderItems(List<CartItem> cartItems)
@@ -138,20 +198,6 @@
                 cartItem.UnitPrice,
                 cartItem.Quantity
             )).ToList();
-        }
-
-        /// <summary>
-        /// Validates that the requested status transition is allowed.
-        /// </summary>
-        private bool IsValidStatusTransition(string newStatus)
-        {
-            return Status switch
-            {
-                "Pending" => newStatus == StatusProcessing || newStatus == StatusCancelled,
-                "Processing" => newStatus == StatusShipped || newStatus == StatusCancelled,
-                "Shipped" => newStatus == StatusDelivered,
-                _ => false
-            };
         }
 
         #endregion

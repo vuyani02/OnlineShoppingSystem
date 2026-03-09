@@ -105,10 +105,27 @@ namespace OnlineShoppingSystem.Services
         /// <summary>
         /// Updates the status of an order.
         /// </summary>
+        /// <summary>
+        /// Updates the order status using the State Pattern.
+        /// Each state controls which transitions are valid.
+        /// </summary>
         public void UpdateOrderStatus(int orderID, string newStatus)
         {
             Order order = _orderRepo.GetById(orderID);
-            order.UpdateStatus(newStatus);
+
+            // Restore state object since it's not saved in JSON
+            order.RestoreState();
+
+            switch (newStatus)
+            {
+                case "Processing": order.Process(); break;
+                case "Shipped": order.Ship(); break;
+                case "Delivered": order.Deliver(); break;
+                case "Cancelled": order.CancelOrder(); break;
+                default:
+                    throw new InvalidOrderStatusException(order.Status, newStatus);
+            }
+
             _orderRepo.Update(order);
         }
 
