@@ -4,7 +4,7 @@
 
 OnlineShoppingSystem is a console-based backend shopping application built in **C#** as part of a graduate development programme. It simulates the backend logic of a real e-commerce platform where customers can browse products, manage shopping carts, place orders, and process payments, while administrators manage products, inventory, and orders.
 
-The system demonstrates strong use of **object-oriented programming**, **class inheritance**, **polymorphism**, **interfaces**, **LINQ querying**, **exception handling**, and **clean architecture** within a console-based environment. All data is persisted using **JSON files**.
+The system demonstrates strong use of **object-oriented programming**, **class inheritance**, **polymorphism**, **interfaces**, **design patterns**, **LINQ querying**, **exception handling**, and **clean architecture** within a console-based environment. All data is persisted using **JSON files**.
 
 ---
 
@@ -31,11 +31,12 @@ The system demonstrates strong use of **object-oriented programming**, **class i
 - Search products by name — case insensitive
 - Add products to cart with quantity selection
 - View and update shopping cart
-- Checkout with wallet payment
+- Checkout with wallet payment and automatic loyalty discount
 - View wallet balance and top up funds
 - View full order history
 - Track individual orders by ID
 - Review and rate purchased products
+- View personal discount tier and progress to next tier
 
 ### 3. Administrator Features
 - Add new products to the catalog
@@ -50,7 +51,8 @@ The system demonstrates strong use of **object-oriented programming**, **class i
 ### 4. Payment System
 - Simulated wallet-based payment
 - Balance validation before checkout
-- Automatic balance deduction on successful order
+- Automatic loyalty discount deducted before payment
+- Full breakdown shown at checkout — Subtotal, Discount, Total
 
 ### 5. Inventory Management
 - Stock tracking per product
@@ -64,7 +66,25 @@ The system demonstrates strong use of **object-oriented programming**, **class i
 - Order tracking by ID
 - Order history per customer
 
-### 7. Exception Handling
+### 7. Loyalty Discount System
+Customers are automatically rewarded based on their order history. The system calculates the discount at checkout using the customer's delivered orders:
+
+| Tier | Requirement | Discount |
+|---|---|---|
+| Bronze | 3+ delivered orders OR R2000+ spent | 5% off |
+| Silver | 5+ delivered orders OR R5000+ spent | 10% off |
+| Gold | 10+ delivered orders OR R10000+ spent | 15% off |
+
+The discount is applied automatically at checkout and shown as a breakdown:
+```
+Subtotal:   R1000.00
+Discount:   -10% (-R100.00)
+Total:      R900.00
+```
+
+Customers can view their current tier and progress to the next tier from the customer menu.
+
+### 8. Exception Handling
 - `InsufficientBalanceException` — wallet too low
 - `OutOfStockException` — product stock insufficient
 - `InvalidLoginException` — wrong credentials
@@ -74,7 +94,7 @@ The system demonstrates strong use of **object-oriented programming**, **class i
 - `EmptyCartException` — checkout with empty cart
 - `InvalidOrderStatusException` — invalid status transition
 
-### 8. Data Persistence
+### 9. Data Persistence
 - All data saved and loaded from JSON files
 - Automatic `data/` folder creation on first save
 - Separate JSON files per domain
@@ -86,13 +106,10 @@ The system demonstrates strong use of **object-oriented programming**, **class i
 ```bash
 # 1. Clone the repository
 git clone https://github.com/vuyani02/OnlineShoppingSystem.git
-
-# 2. Navigate to the project folder
-cd OnlineShoppingSystem
-
-# 3. Run the application
-dotnet run
 ```
+
+2. Open the cloned folder in **Visual Studio**
+3. Press the **Run button** (or press **F5**) to start the application
 
 ---
 
@@ -131,7 +148,8 @@ OnlineShoppingSystem/
 │   ├── CartItem.cs
 │   ├── Order.cs
 │   ├── OrderItem.cs
-│   └── Review.cs
+│   ├── Review.cs
+│   └── DiscountTier.cs              # Represents a loyalty discount tier
 │
 ├── Repositories/                    # Data access layer
 │   ├── IRepository.cs               # Generic repository interface
@@ -142,14 +160,23 @@ OnlineShoppingSystem/
 ├── Services/                        # Business logic layer
 │   ├── UserService.cs
 │   ├── ProductService.cs
-│   └── OrderService.cs
+│   ├── OrderService.cs
+│   └── DiscountService.cs           # Loyalty discount calculation
 │
-├── Factories/                       # User creation logic
+├── Factories/                       # Factory Pattern
 │   └── UserFactory.cs
 │
-├── Strategies/                      # Payment processing
+├── Strategies/                      # Strategy Pattern
 │   ├── IPaymentStrategy.cs
 │   └── WalletPayment.cs
+│
+├── States/                          # State Pattern
+│   ├── IOrderState.cs
+│   ├── PendingState.cs
+│   ├── ProcessingState.cs
+│   ├── ShippedState.cs
+│   ├── DeliveredState.cs
+│   └── CancelledState.cs
 │
 ├── Exceptions/                      # Custom exceptions
 │   ├── InsufficientBalanceException.cs
@@ -166,7 +193,7 @@ OnlineShoppingSystem/
 │   ├── products.json
 │   └── orders.json
 │
-├── DataStore.cs                     # Shared data instance
+├── DataStore.cs                     # Singleton Pattern
 └── Program.cs                       # Console menus and entry point
 ```
 
@@ -186,15 +213,52 @@ data/*.json         ← JSON file storage
 
 ---
 
+## 🎨 Design Patterns
+
+### Singleton — `DataStore.cs`
+Ensures only one instance of the data store exists throughout the application. All repositories are accessed through `DataStore.Instance` so every service always reads and writes to the same data in memory.
+
+### Factory — `UserFactory.cs`
+Responsible for creating the correct user object based on the selected role. When a user registers, the factory receives the role string and returns either a `Customer` or an `Administrator` object without the calling code needing to know how each is constructed.
+
+### Strategy — `WalletPayment.cs`
+Defines a common `IPaymentStrategy` interface for processing payments. Currently implemented by `WalletPayment` which deducts the order total from the customer's wallet. A new payment method such as credit card can be added in the future by simply creating a new class that implements the same interface — no changes needed in `OrderService`.
+
+### State — `States/`
+Manages the order lifecycle by giving each status its own class. Each state defines exactly which transitions are allowed — for example `PendingState` allows moving to Processing or Cancelled but rejects Shipped or Delivered. This prevents invalid transitions entirely rather than relying on if/else checks.
+
+```
+Pending → Processing → Shipped → Delivered
+    ↘           ↘
+    Cancelled   Cancelled
+```
+
+---
+
 ## 🎯 OOP Concepts Demonstrated
 
 | Concept | Implementation |
 |---|---|
 | **Inheritance** | `Customer` and `Administrator` inherit from `User` |
 | **Polymorphism** | `DisplayInfo()` overridden in each user subclass |
-| **Interfaces** | `IRepository<T>` implemented by all repositories |
+| **Interfaces** | `IRepository<T>`, `IPaymentStrategy`, `IOrderState` |
 | **Encapsulation** | Private fields with controlled public access |
 | **Abstraction** | Services hide data access details from the console menu |
+
+---
+
+## 📊 Rubric Coverage
+
+| Criteria | Implementation |
+|---|---|
+| System Functionality | Full customer and admin workflows |
+| Object-Oriented Design | Inheritance, polymorphism, interfaces, encapsulation |
+| Design Patterns | Singleton, Factory, Strategy, State |
+| Console Interface | Role-based menus with input validation |
+| LINQ Usage | Search, filter, sort, aggregate across all repositories |
+| Exception Handling | 8 custom exceptions across all layers |
+| Advanced Features | Loyalty discount system |
+| Code Quality | Comments, regions, constants, single responsibility |
 
 ---
 
@@ -206,7 +270,7 @@ data/*.json         ← JSON file storage
 | Developer | Vuyani Matshungwana |
 | Type | Console Application |
 | Language | C# / .NET 8 |
-| Purpose | Graduate Training Project — Submission 1 |
+| Purpose | Graduate Training Project |
 
 ---
 

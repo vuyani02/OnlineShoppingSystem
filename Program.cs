@@ -378,8 +378,6 @@ namespace OnlineShoppingSystem
             catch (InsufficientBalanceException ex)
             {
                 ShowError(ex.Message);
-                Console.WriteLine($"  Top up R{ex.RequiredAmount - ex.AvailableAmount:F2} to proceed.");
-                PressAnyKey();
             }
             catch (OutOfStockException ex) { ShowError(ex.Message); }
             catch (Exception ex) { ShowError($"Unexpected error: {ex.Message}"); }
