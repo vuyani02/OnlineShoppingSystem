@@ -186,7 +186,8 @@ namespace OnlineShoppingSystem
                 Console.WriteLine("║  9.  View Order History                      ║");
                 Console.WriteLine("║  10. Track Order                             ║");
                 Console.WriteLine("║  11. Review a Product                        ║");
-                Console.WriteLine("║  12. Logout                                  ║");
+                Console.WriteLine("║  12. View Discount Status                    ║");
+                Console.WriteLine("║  13. Logout                                  ║");
                 Console.WriteLine("╚══════════════════════════════════════════════╝");
                 Console.Write("\nEnter choice: ");
 
@@ -206,13 +207,14 @@ namespace OnlineShoppingSystem
                     case "9": ViewOrderHistory(customer); break;
                     case "10": TrackOrder(); break;
                     case "11": ReviewProduct(customer); break;
-                    case "12":
+                    case "12": ViewDiscountStatus(customer); break;
+                    case "13":
                         _loggedInCustomer = null;
-                        Console.WriteLine("✓ Logged out successfully.");
+                        Console.WriteLine("[OK] Logged out successfully.");
                         PressAnyKey();
                         return;
                     default:
-                        ShowError("Invalid choice. Please enter a number between 1 and 12.");
+                        ShowError("Invalid choice. Please enter a number between 1 and 13.");
                         break;
                 }
             }
@@ -505,6 +507,17 @@ namespace OnlineShoppingSystem
             }
             catch (ProductNotFoundException ex) { ShowError(ex.Message); }
             catch (ArgumentException ex) { ShowError(ex.Message); }
+        }
+
+        /// <summary>
+        /// Displays the customer's current discount tier and progress.
+        /// </summary>
+        private static void ViewDiscountStatus(Customer customer)
+        {
+            Console.Clear();
+            _orderService.GetDiscountService().DisplayCustomerDiscount(customer.UserID);
+            _orderService.GetDiscountService().DisplayAllTiers();
+            PressAnyKey();
         }
 
         #endregion
@@ -808,6 +821,7 @@ namespace OnlineShoppingSystem
                 PressAnyKey();
             }
             catch (OrderNotFoundException ex) { ShowError(ex.Message); }
+            catch (InvalidOrderStatusException ex) { ShowError(ex.Message); }
             catch (InvalidOperationException ex) { ShowError(ex.Message); }
         }
 

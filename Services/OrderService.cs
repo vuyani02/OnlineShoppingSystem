@@ -7,7 +7,7 @@ namespace OnlineShoppingSystem.Services
 {
     /// <summary>
     /// Handles all order related business logic.
-    /// Uses Strategy pattern for payment processing.
+    /// Uses Strategy pattern for payment and DiscountService for loyalty discounts.
     /// </summary>
     public class OrderService
     {
@@ -16,6 +16,7 @@ namespace OnlineShoppingSystem.Services
         private readonly OrderRepository _orderRepo;
         private readonly ProductRepository _productRepo;
         private readonly IPaymentStrategy _paymentStrategy;
+        private readonly DiscountService _discountService;
 
         #endregion
 
@@ -26,6 +27,7 @@ namespace OnlineShoppingSystem.Services
             _orderRepo = DataStore.Instance.OrderRepository;
             _productRepo = DataStore.Instance.ProductRepository;
             _paymentStrategy = new WalletPayment();
+            _discountService = new DiscountService();
         }
 
         #endregion
@@ -33,34 +35,42 @@ namespace OnlineShoppingSystem.Services
         #region Customer Methods
 
         /// <summary>
-        /// Processes checkout — creates order, processes payment and reduces stock.
-        /// Throws EmptyCartException if cart is empty.
-        /// Throws InsufficientBalanceException if wallet balance is too low.
+        /// Processes checkout — applies loyalty discount, creates order,
+        /// processes payment and reduces stock.
         /// </summary>
         public void Checkout(Customer customer)
         {
             if (customer.Cart.IsEmpty)
                 throw new EmptyCartException();
 
-            int orderID = _orderRepo.GetNextID();
-            Order order = new Order(orderID, customer.UserID, customer.FullName, customer.Cart.Items);
+            // Calculate discount based on order history
+            double discountPercent = _discountService.GetDiscountPercent(customer.UserID);
+            double discountAmount = _discountService.CalculateDiscountAmount(customer.Cart.TotalPrice, discountPercent);
 
-            // Strategy pattern — process payment via wallet
+            int orderID = _orderRepo.GetNextID();
+            Order order = new Order(orderID, customer.UserID, customer.FullName, customer.Cart.Items, discountPercent, discountAmount);
+
+            // Process payment with discounted total
             _paymentStrategy.ProcessPayment(customer, order.TotalAmount);
 
-            // Save the order
+            // Save order
             _orderRepo.Add(order);
 
-            // Reduce stock for each item ordered
+            // Reduce stock
             ReduceStock(order);
 
-            // Add to customer history and clear cart
+            // Add to history and clear cart
             customer.AddOrderToHistory(order);
             customer.Cart.Clear();
 
-            Console.WriteLine($"[OK] Order #{order.OrderID} confirmed!");
-            Console.WriteLine($"     Total:  R{order.TotalAmount:F2}");
-            Console.WriteLine($"     Status: {order.Status}");
+            Console.WriteLine($"\n[OK] Order #{order.OrderID} placed successfully!");
+            Console.WriteLine($"     Subtotal:  R{order.Subtotal:F2}");
+
+            if (discountPercent > 0)
+                Console.WriteLine($"     Discount:  -{discountPercent}% (-R{discountAmount:F2})");
+
+            Console.WriteLine($"     Total:     R{order.TotalAmount:F2}");
+            Console.WriteLine($"     Status:    {order.Status}");
         }
 
         /// <summary>
@@ -77,7 +87,7 @@ namespace OnlineShoppingSystem.Services
         }
 
         /// <summary>
-        /// Returns a single order by ID for order tracking.
+        /// Returns a single order by ID for tracking.
         /// </summary>
         public Order TrackOrder(int orderID)
         {
@@ -85,7 +95,7 @@ namespace OnlineShoppingSystem.Services
         }
 
         /// <summary>
-        /// Cancels an order if it is still in a cancellable state.
+        /// Cancels an order if it belongs to the customer and is cancellable.
         /// </summary>
         public void CancelOrder(int orderID, Customer customer)
         {
@@ -103,17 +113,11 @@ namespace OnlineShoppingSystem.Services
         #region Admin Methods
 
         /// <summary>
-        /// Updates the status of an order.
-        /// </summary>
-        /// <summary>
         /// Updates the order status using the State Pattern.
-        /// Each state controls which transitions are valid.
         /// </summary>
         public void UpdateOrderStatus(int orderID, string newStatus)
         {
             Order order = _orderRepo.GetById(orderID);
-
-            // Restore state object since it's not saved in JSON
             order.RestoreState();
 
             switch (newStatus)
@@ -148,7 +152,7 @@ namespace OnlineShoppingSystem.Services
             Console.WriteLine("╔═════════════════════════════════════════════════════════════════════════╗");
             Console.WriteLine("║              SALES REPORT                                               ║");
             Console.WriteLine("╠═════════════════════════════════════════════════════════════════════════╣");
-            Console.WriteLine($"║  Total Orders:     {allOrders.Count(), -53}║");
+            Console.WriteLine($"║  Total Orders:     {allOrders.Count(),-53}║");
             Console.WriteLine($"║  Delivered Orders: {deliveredOrders.Count(),-53}║");
             Console.WriteLine($"║  Pending Orders:   {allOrders.Count(o => o.Status == "Pending"),-53}║");
             Console.WriteLine($"║  Cancelled Orders: {allOrders.Count(o => o.Status == "Cancelled"),-53}║");
@@ -160,6 +164,14 @@ namespace OnlineShoppingSystem.Services
                 Console.WriteLine($"║  -> {product,-68}║");
 
             Console.WriteLine("╚═════════════════════════════════════════════════════════════════════════╝");
+        }
+
+        /// <summary>
+        /// Returns the DiscountService for use in Program.cs menus.
+        /// </summary>
+        public DiscountService GetDiscountService()
+        {
+            return _discountService;
         }
 
         #endregion

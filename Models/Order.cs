@@ -18,9 +18,14 @@ namespace OnlineShoppingSystem.Models
         public string Status { get; set; }
         public DateTime OrderDate { get; set; }
         public DateTime? DeliveryDate { get; set; }
+        public double DiscountPercent { get; set; }  // ← new
+        public double DiscountAmount { get; set; }  // ← new
 
         [JsonIgnore]
-        public double TotalAmount => Items.Sum(item => item.Subtotal);
+        public double Subtotal => Items.Sum(item => item.Subtotal);
+
+        [JsonIgnore]
+        public double TotalAmount => Subtotal - DiscountAmount;  // ← deducts discount
 
         [JsonIgnore]
         public int TotalItems => Items.Sum(item => item.Quantity);
@@ -28,7 +33,6 @@ namespace OnlineShoppingSystem.Models
         [JsonIgnore]
         public bool IsCancellable => Status == "Pending" || Status == "Processing";
 
-        // Current state object — not saved to JSON
         [JsonIgnore]
         private IOrderState _currentState;
 
@@ -36,13 +40,12 @@ namespace OnlineShoppingSystem.Models
 
         #region Constructor
 
-        // Parameterless constructor for JSON deserialization
         public Order()
         {
             Items = new List<OrderItem>();
         }
 
-        public Order(int orderID, int customerID, string customerName, List<CartItem> cartItems)
+        public Order(int orderID, int customerID, string customerName, List<CartItem> cartItems, double discountPercent = 0, double discountAmount = 0)
         {
             OrderID = orderID;
             CustomerID = customerID;
@@ -50,8 +53,9 @@ namespace OnlineShoppingSystem.Models
             OrderDate = DateTime.Now;
             DeliveryDate = null;
             Items = ConvertCartItemsToOrderItems(cartItems);
+            DiscountPercent = discountPercent;   // ← new
+            DiscountAmount = discountAmount;    // ← new
 
-            // Set initial state
             SetState(new PendingState());
         }
 
@@ -77,8 +81,7 @@ namespace OnlineShoppingSystem.Models
         }
 
         /// <summary>
-        /// Loads the correct state object based on the saved Status string.
-        /// Called after loading from JSON since state objects aren't serialized.
+        /// Restores the correct state object after loading from JSON.
         /// </summary>
         public void RestoreState()
         {
@@ -97,36 +100,24 @@ namespace OnlineShoppingSystem.Models
 
         #region Order Lifecycle Methods
 
-        /// <summary>
-        /// Transitions the order to Processing state.
-        /// </summary>
         public void Process()
         {
             EnsureStateLoaded();
             _currentState.Process(this);
         }
 
-        /// <summary>
-        /// Transitions the order to Shipped state.
-        /// </summary>
         public void Ship()
         {
             EnsureStateLoaded();
             _currentState.Ship(this);
         }
 
-        /// <summary>
-        /// Transitions the order to Delivered state.
-        /// </summary>
         public void Deliver()
         {
             EnsureStateLoaded();
             _currentState.Deliver(this);
         }
 
-        /// <summary>
-        /// Cancels the order if current state allows it.
-        /// </summary>
         public void CancelOrder()
         {
             EnsureStateLoaded();
@@ -138,7 +129,10 @@ namespace OnlineShoppingSystem.Models
         #region Display Methods
 
         /// <summary>
-        /// Displays full order details including all items and totals.
+        /// Displays full order details including discount breakdown.
+        /// </summary>
+        /// <summary>
+        /// Displays full order details including discount breakdown.
         /// </summary>
         public void DisplayInfo()
         {
@@ -155,12 +149,17 @@ namespace OnlineShoppingSystem.Models
             Console.WriteLine($"  {new string('─', 50)}");
 
             foreach (OrderItem item in Items)
-            {
                 Console.WriteLine($"  {item.ProductName,-25} {item.Quantity,-5} R{item.UnitPrice,-9:F2} R{item.Subtotal:F2}");
-            }
 
             Console.WriteLine($"  {new string('─', 50)}");
             Console.WriteLine($"  {"Total Items:",-25} {TotalItems}");
+
+            if (DiscountPercent > 0)
+            {
+                Console.WriteLine($"  {"Subtotal:",-25} R{Subtotal:F2}");
+                Console.WriteLine($"  {"Discount:",-25} -{DiscountPercent}% (-R{DiscountAmount:F2})");
+            }
+
             Console.WriteLine($"  {"Total Amount:",-25} R{TotalAmount:F2}");
         }
 
@@ -176,20 +175,12 @@ namespace OnlineShoppingSystem.Models
 
         #region Private Helper Methods
 
-        /// <summary>
-        /// Ensures state is loaded — restores from Status string if needed.
-        /// This handles orders loaded from JSON where state object is null.
-        /// </summary>
         private void EnsureStateLoaded()
         {
             if (_currentState == null)
                 RestoreState();
         }
 
-        /// <summary>
-        /// Converts cart items into order items at time of purchase.
-        /// Preserves the price at the time of purchase.
-        /// </summary>
         private List<OrderItem> ConvertCartItemsToOrderItems(List<CartItem> cartItems)
         {
             return cartItems.Select(cartItem => new OrderItem(
