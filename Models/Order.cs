@@ -116,9 +116,10 @@
         /// Displays a compact single line summary of the order.
         /// Used when listing order history.
         /// </summary>
+        /// Console.WriteLine($"{"ID",-5} {"Status",-11} {"TotalItems", -15} {"TotalAmount", -15} {"Date"}");
         public void DisplaySummary()
         {
-            Console.WriteLine($"[#{OrderID}] {OrderDate:dd MMM yyyy}  {Status,-12}  {TotalItems} items  R{TotalAmount:F2}");
+            Console.WriteLine($"{OrderID, -5}  {Status,-11}  {TotalItems, -13}  R{TotalAmount, -13:F2} {OrderDate:dd MMM yyyy}");
         }
 
         #endregion

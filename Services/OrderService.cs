@@ -128,21 +128,21 @@ namespace OnlineShoppingSystem.Services
             IEnumerable<Order> allOrders = _orderRepo.GetAll();
             IEnumerable<Order> deliveredOrders = allOrders.Where(o => o.Status == "Delivered");
 
-            Console.WriteLine("╔══════════════════════════════════════════════╗");
-            Console.WriteLine("║              SALES REPORT                    ║");
-            Console.WriteLine("╠══════════════════════════════════════════════╣");
-            Console.WriteLine($"  Total Orders:     {allOrders.Count()}");
-            Console.WriteLine($"  Delivered Orders: {deliveredOrders.Count()}");
-            Console.WriteLine($"  Pending Orders:   {allOrders.Count(o => o.Status == "Pending")}");
-            Console.WriteLine($"  Cancelled Orders: {allOrders.Count(o => o.Status == "Cancelled")}");
-            Console.WriteLine($"  Total Revenue:    R{_orderRepo.GetTotalRevenue():F2}");
-            Console.WriteLine("╠══════════════════════════════════════════════╣");
-            Console.WriteLine("  Top Selling Products:");
+            Console.WriteLine("╔═════════════════════════════════════════════════════════════════════════╗");
+            Console.WriteLine("║              SALES REPORT                                               ║");
+            Console.WriteLine("╠═════════════════════════════════════════════════════════════════════════╣");
+            Console.WriteLine($"║  Total Orders:     {allOrders.Count(), -53}║");
+            Console.WriteLine($"║  Delivered Orders: {deliveredOrders.Count(),-53}║");
+            Console.WriteLine($"║  Pending Orders:   {allOrders.Count(o => o.Status == "Pending"),-53}║");
+            Console.WriteLine($"║  Cancelled Orders: {allOrders.Count(o => o.Status == "Cancelled"),-53}║");
+            Console.WriteLine($"║  Total Revenue:    R{_orderRepo.GetTotalRevenue(),-52:F2}║");
+            Console.WriteLine("╠═════════════════════════════════════════════════════════════════════════╣");
+            Console.WriteLine("║  Top Selling Products:                                                  ║");
 
             foreach (string product in _orderRepo.GetTopSellingProducts())
-                Console.WriteLine($"  -> {product}");
+                Console.WriteLine($"║  -> {product,-68}║");
 
-            Console.WriteLine("╚══════════════════════════════════════════════╝");
+            Console.WriteLine("╚═════════════════════════════════════════════════════════════════════════╝");
         }
 
         #endregion

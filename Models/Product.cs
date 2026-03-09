@@ -24,7 +24,7 @@ namespace OnlineShoppingSystem.Models
         public int Stock { get; private set; }
         public List<Review> Reviews { get; private set; }
         public bool IsAvailable => Stock > 0;
-        public bool IsLowStock => Stock <= LowStockThreshold && Stock > 0;
+        public bool IsLowStock => Stock <= LowStockThreshold;
         public double AverageRating => Reviews.Count == 0 ? 0 : Reviews.Average(r => r.Rating);
 
         #endregion

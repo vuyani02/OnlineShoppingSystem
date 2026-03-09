@@ -427,6 +427,9 @@ namespace OnlineShoppingSystem
 
             try
             {
+                Console.WriteLine($"{"ID",-5} {"Status",-11} {"TotalItems",-15} {"TotalAmount",-15} {"Date"}");
+                Console.WriteLine(new string('─', 61));
+
                 var orders = _orderService.GetOrderHistory(customer.UserID);
                 foreach (var order in orders)
                 {
@@ -538,11 +541,12 @@ namespace OnlineShoppingSystem
                     case "2": UpdateProduct(admin); break;
                     case "3": DeleteProduct(admin); break;
                     case "4": RestockProduct(admin); break;
-                    case "5": ViewAllProducts(); break;
-                    case "6": ViewAllOrders(); break;
+                    case "5": ViewAllProducts(); PressAnyKey(); break;
+                    case "6": ViewAllOrders(); PressAnyKey(); break;
                     case "7": UpdateOrderStatus(admin); break;
-                    case "8": ViewLowStockProducts(); break;
+                    case "8": ViewLowStockProducts(); PressAnyKey(); break;
                     case "9":
+                        Console.Clear();
                         _orderService.GenerateSalesReport();
                         PressAnyKey(); break;
                     case "10":
@@ -612,6 +616,8 @@ namespace OnlineShoppingSystem
             try
             {
                 ViewAllProducts();
+
+                Console.WriteLine();
 
                 Console.Write("Enter Product ID to update: ");
                 if (!int.TryParse(Console.ReadLine().Trim(), out int productID))
@@ -690,6 +696,8 @@ namespace OnlineShoppingSystem
             {
                 ViewLowStockProducts();
 
+                Console.WriteLine();
+
                 Console.Write("Enter Product ID to restock: ");
                 if (!int.TryParse(Console.ReadLine().Trim(), out int productID))
                 {
@@ -726,8 +734,6 @@ namespace OnlineShoppingSystem
 
             foreach (var product in products)
                 product.DisplaySummary();
-
-            PressAnyKey();
         }
 
         /// <summary>
@@ -747,13 +753,11 @@ namespace OnlineShoppingSystem
                 return;
             }
 
-            Console.WriteLine($"{"ID",-8} {"Customer",-20} {"Date",-15} {"Status",-12} {"Total"}");
-            Console.WriteLine(new string('─', 70));
+            Console.WriteLine($"{"ID",-5} {"Status",-11} {"TotalItems", -15} {"TotalAmount", -15} {"Date"}");
+            Console.WriteLine(new string('─', 61));
 
             foreach (var order in orders)
                 order.DisplaySummary();
-
-            PressAnyKey();
         }
 
         /// <summary>
@@ -767,6 +771,8 @@ namespace OnlineShoppingSystem
             try
             {
                 ViewAllOrders();
+
+                Console.WriteLine();
 
                 Console.Write("Enter Order ID: ");
                 if (!int.TryParse(Console.ReadLine().Trim(), out int orderID))
@@ -818,17 +824,14 @@ namespace OnlineShoppingSystem
             if (!products.Any())
             {
                 Console.WriteLine("✓ No low stock products.");
-                PressAnyKey();
                 return;
             }
 
-            Console.WriteLine($"{"ID",-5} {"Name",-25} {"Category",-15} {"Price",-12} {"Stock"}");
-            Console.WriteLine(new string('─', 65));
+            Console.WriteLine($"{"ID",-5} {"Name",-25} {"Category",-15} {"Price",-12} {"Stock",-8} {"Rating"}");
+            Console.WriteLine(new string('─', 77));
 
             foreach (var product in products)
                 product.DisplaySummary();
-
-            PressAnyKey();
         }
 
         #endregion
